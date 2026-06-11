@@ -12,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,8 +23,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Tag(name = "API для экскурсий")
 @RestController
-@RequestMapping("/api/v1/excursions")
+@RequestMapping("/api/v1/excursion")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class ExcursionController {
 
     private final JdbcHelper jdbcHelper;
@@ -46,10 +51,12 @@ public class ExcursionController {
         return excursionMapper.toResponse(entity);
     }
 
-    @Operation(summary = "Предоставляет полный список экскурсий")
+    @Operation(summary = "Предоставляет полный список экскурсий (с пагинацией и сортировкой)")
     @GetMapping(produces = APPLICATION_JSON_VALUE)
-    public List<ExcursionResponse> getAll() {
-        return jdbcHelper.getAll().stream()
+    public List<ExcursionResponse> getAll(
+            @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable
+    ) {
+        return jdbcHelper.getAll(pageable).stream()
                 .map(excursionMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -74,13 +81,13 @@ public class ExcursionController {
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable Integer id) {
-        // Проверяем, есть ли запись, чтобы выбросить ошибку до удаления (опционально)
+
         Excursion existingEntity = jdbcHelper.getById(id);
         if (existingEntity == null) {
             throw new RuntimeException("Экскурсия для удаления не найдена!");
         }
 
-        jdbcHelper.delete(id); // Вызываем метод delete из вашего JdbcHelper
+        jdbcHelper.delete(id);
     }
 }
 

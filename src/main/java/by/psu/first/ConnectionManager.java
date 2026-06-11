@@ -33,13 +33,25 @@ public class ConnectionManager {
 
     public static Connection open() {
         try {
-            return DriverManager.getConnection(
-                    PROPERTIES.getProperty("db.url"),
-                    PROPERTIES.getProperty("db.username"),
-                    PROPERTIES.getProperty("db.password")
-            );
+
+            String envUrl = System.getenv("SPRING_DATASOURCE_URL");
+
+
+            String finalUrl = (envUrl != null) ? envUrl : PROPERTIES.getProperty("db.url");
+
+
+            String envUser = System.getenv("SPRING_DATASOURCE_USERNAME");
+            String finalUser = (envUser != null) ? envUser : PROPERTIES.getProperty("db.username");
+
+            String envPassword = System.getenv("SPRING_DATASOURCE_PASSWORD");
+            String finalPassword = (envPassword != null) ? envPassword : PROPERTIES.getProperty("db.password");
+
+
+            return DriverManager.getConnection(finalUrl, finalUser, finalPassword);
+
         } catch (SQLException e) {
             throw new RuntimeException("Не удалось установить соединение с БД", e);
         }
     }
+
 }

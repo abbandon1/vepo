@@ -1,6 +1,5 @@
 package by.psu.first;
 
-import by.psu.exception.TourServiceValidationException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
